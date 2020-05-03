@@ -1,10 +1,10 @@
-function SnakesLadders() {}
+//Define board globally
 let fields = [
 	[ 2, 38 ],
 	[ 7, 14 ],
 	[ 8, 31 ],
 	[ 15, 26 ],
-	[ 16, 5 ],
+	[ 16, 6 ],
 	[ 21, 42 ],
 	[ 28, 84 ],
 	[ 36, 44 ],
@@ -22,63 +22,66 @@ let fields = [
 	[ 95, 75 ],
 	[ 99, 80 ]
 ];
-let status = { p1: 0, p2: 0, turn: 1 };
+
 let board = [];
 for (i in fields) {
 	board[fields[i][0]] = fields[i][1];
 }
 
+function SnakesLadders() {
+	//initialize game instance
+	this.stat = { p1: 0, p2: 0, turn: 1 };
+	this.message = '';
+	this.winner = 0;
+}
+
 SnakesLadders.prototype.play = function(die1, die2) {
-	var message = '';
-	// Prüfe ob Spiel vorbei
-	if ((status.p1 == 100) | (status.p2 == 100)) {
+	console.log(this.stat);
+	this.message = '';
+	this.winner = 0;
+	// check if game already over
+	if ((this.stat.p1 == 100) | (this.stat.p2 == 100)) {
 		return 'Game over!';
 	}
 
-	//führe zug würfel 1 aus
-	console.log('Zug 1 (' + die1 + ') mit Spieler ' + status.turn);
-	this.draw(die1, status.turn);
-	//führe zug würfel 2 aus
-	console.log('Zug 2 (' + die2 + ') mit Spieler ' + status.turn);
-	this.draw(die2, status.turn);
+	//call draw method
+	this.draw(die1 + die2, this.stat.turn);
 
-	// Ziel Erreicht? -> Sieg für den Spieler und Ausgabe + Ende
-	if ((status.p1 == 100) | (status.p2 == 100)) {
-		return 'Player ' + status.turn + ' Wins!';
+	// if player reached end field return winner message
+	if ((this.stat.p1 == 100) | (this.stat.p2 == 100)) {
+		this.winner = this.stat.turn;
+		//status = { p1: 0, p2: 0, turn: 1 };
+		return 'Player ' + this.winner + ' Wins!';
 	}
 
 	//gib position aktueller spieler zurück
-	message = 'Player ' + status.turn + ' is on square ' + (status.turn == 1 ? status.p1 : status.p2);
-	console.log(message);
-	//wechsle Spieler wenn Augen ungleich
+	this.message = 'Player ' + this.stat.turn + ' is on square ' + (this.stat.turn == 1 ? this.stat.p1 : this.stat.p2);
+	//switch player only if eyes not equal
 	if (die1 != die2) {
-		// wechsle spieler
-		status.turn = status.turn == 1 ? 2 : 1;
+		this.stat.turn = this.stat.turn == 1 ? 2 : 1;
 	}
-	return message;
+	return this.message;
 };
 
 SnakesLadders.prototype.draw = function(eyes, player) {
-	// Berechne Summe aus aktueller Position des Spielers und Wurfzahl
-	let target = player == 1 ? eyes + status.p1 : eyes + status.p2;
+	// calculate target field
+	let target = player == 1 ? eyes + this.stat.p1 : eyes + this.stat.p2;
 
-	// Ziel überschritten -> Bounce Back
+	// if target > 100 then bounce back
 	if (target > 100) {
 		target = 100 - (target - 100);
 	}
 
-	// Leiter oder Schlange -> versetze Spieler auf Endpunkt von Leiter/Schlange
+	// if snake or ladder reached move player to target field
 	if (board[target]) {
 		target = board[target];
 	}
 
-	//setze Spieler auf neues Feld
-	if (status.turn == 1) {
-		status.p1 = target;
+	//move player position
+	if (this.stat.turn == 1) {
+		this.stat.p1 = target;
 	} else {
-		status.p2 = target;
+		this.stat.p2 = target;
 	}
 	return true;
 };
-
-//console.log(board);
